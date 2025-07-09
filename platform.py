@@ -1,6 +1,4 @@
-import pygame
-import sys
-import random
+import pygame, random
 
 pygame.init()
 
@@ -104,7 +102,7 @@ def main():
             stretch_w += stretch_amount // 2
             stretch_h -= stretch_amount // 2
         elif squash_timer > 0:
-            # Jump squash start
+            # Jump squash start``
             stretch_w += stretch_amount
             stretch_h -= stretch_amount
             squash_timer -= 1
@@ -127,7 +125,7 @@ def main():
             pygame.draw.rect(screen, RED, platforms[i])
         
         # Update screen    
-        pygame.display.flip()
+        pygame.display.update()
 
     pygame.quit()
     
