@@ -6,9 +6,10 @@ pygame.init()
 WIDTH, HEIGHT = 800, 600
 FPS = 60
 PLAYER_WIDTH, PLAYER_HEIGHT = 50, 60
+PLAYER_X, PLAYER_Y = 400, 480
 GRAVITY = 0.5
-JUMP_VELOCITY = -10
-GWDTH, GHIGHT = WIDTH, 150
+JUMP_VELOCITY = -12
+PWDTH, PHIGHT = 140, 20 
 
 # Colors
 WHITE = (255, 255, 255)
@@ -25,72 +26,103 @@ icon = pygame.image.load("icon.png")
 pygame.display.set_icon(icon)
 
 # Initialise players
-player1 = pygame.Rect(100, HEIGHT - 150, PLAYER_WIDTH, PLAYER_HEIGHT)
-player1_vel_y = 0
+player_rect = pygame.Rect(PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT)
+player_vel_y = 0
 onGround = False
 
-# Initialize platforms
-ground = pygame.Rect(0, HEIGHT - 90, GWDTH, GHIGHT)
-platforms = []
-for i in range(6):
-    thisPlat = [random.randint(50, 700), random.randint(0, 500)]
-    platforms.append(thisPlat)
-for i in range(len(platforms)):
-    platforms[i] = pygame.Rect(platforms[i][0], platforms[i][1], 100, 20)
+# Initialize/Build platforms
+platforms = [[PLAYER_X - 20, PLAYER_Y + 70, PWDTH, PHIGHT],
+             [120, 480, PWDTH, PHIGHT],
+             [200, 370, PWDTH, PHIGHT],
+             [500, 520, PWDTH, PHIGHT],
+             [420, 300, PWDTH, PHIGHT],
+             [210, 220, PWDTH, PHIGHT],
+             [600, 170, PWDTH, PHIGHT],
+             [500, 100, PWDTH, PHIGHT]]
 
+#Function: list -> list
+#Returns the updated list to generate platforms
+def updatePlatfroms(list, playerY, change):
+    if playerY < 250:
+        for i in range(len(list)):
+            list[i][1] += change
+    for item in range(len(list)):
+        if list[item][1] > 600:
+            list[item] = [random.randint(10, 750), random.randint(-50, -10), PWDTH, PHIGHT]
+    return list
+
+        
 # Main loop
 def main():
     
-    global player1_vel_y
+    global player_vel_y
     global onGround
+    global player_rect
+    global platforms
     
-    # Squish/stretch parameters
+    
+    #Squish/stretch parameters
     stretch_amount = 10
     squash_timer = 0
     is_running = False   
+    
     
     running = True
     while running:
         clock.tick(FPS)
         screen.fill(WHITE)
         
+        # Platforms
+        blocks = []
+        for i in range(len(platforms)):
+            block = pygame.draw.rect(screen, RED, platforms[i], 0, 4)
+            blocks.append(block)
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 
         # Movment
-        dx = 0
+        dx = 0                              #Horizontal Movement
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] and onGround:
-            player1_vel_y = JUMP_VELOCITY
+            player_vel_y = JUMP_VELOCITY
             onGround = False
             squash_timer = 10
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT]: 
             dx += 5
         if keys[pygame.K_LEFT]:
             dx -= 5
-        is_running = dx != 0    
-        
-        #Gravity
-        player1_vel_y += GRAVITY
-        player1.y += player1_vel_y
-        player1.x += dx
-        
-        #Collision
-        if player1.colliderect(ground):
-            player1.y = ground.top - player1.height  # Align with top of ground
-            player1_vel_y = 0
-            onGround = True
-        else:
-            onGround = False
-        for platform in platforms:
-            if player1.colliderect(platform):
-                if player1_vel_y > 0:  # Falling down
-                    player1.bottom = platform.top
-                    player1_vel_y = 0
-                    onGround = True
+        is_running = dx != 0
             
-        # Animation properties
+        #Gravity
+        player_vel_y += GRAVITY
+        player_rect.y += player_vel_y
+        player_rect.x += dx
+        
+        # Collision
+         
+        # Vertical Collision
+        onGround = False
+        for block in blocks:
+            if player_rect.colliderect(block) and player_vel_y > 0 and not onGround and player_rect.bottom <= block.bottom:
+                player_rect.bottom = block.top 
+                player_vel_y = 0
+                onGround = True
+            elif player_rect.colliderect(block) and player_rect.top < block.bottom:
+                player_vel_y = 0
+        
+        #Horizontal Collision
+            if player_rect.colliderect(block):
+                if dx > 0 and player_rect.right > block.left:
+                    player_rect.right = block.left - 1
+                    onGround = True
+                elif dx < 0 and player_rect.left < block.right:
+                    player_rect.left = block.right + 1
+                    onGround = True
+        
+                  
+        #Animation properties
         stretch_w, stretch_h = PLAYER_WIDTH, PLAYER_HEIGHT
         
         if not onGround:
@@ -110,19 +142,21 @@ def main():
             # Crouching - squash down
             stretch_h -= stretch_amount
             stretch_w += stretch_amount
-            
+        
+        
+        '''
         player_rect = pygame.Rect(
-        player1.x + (PLAYER_WIDTH - stretch_w) // 2,
-        player1.y + (PLAYER_HEIGHT - stretch_h),
+        player_rect.x + (PLAYER_WIDTH - stretch_w) // 2,
+        player_rect.y + (PLAYER_HEIGHT - stretch_h),
         stretch_w,
         stretch_h
     )
-        
+        '''
+              
+        platforms = updatePlatfroms(platforms, player_rect.y, 4)      
+              
         # Draw to screen
         pygame.draw.rect(screen, BLUE, player_rect)
-        pygame.draw.rect(screen, GREEN, ground)
-        for i in range(len(platforms)):
-            pygame.draw.rect(screen, RED, platforms[i])
         
         # Update screen    
         pygame.display.update()
