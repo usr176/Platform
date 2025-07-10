@@ -1,4 +1,5 @@
 import pygame, random
+import pygame.freetype
 
 pygame.init()
 
@@ -10,19 +11,26 @@ PLAYER_X, PLAYER_Y = 400, 480
 GRAVITY = 0.5
 JUMP_VELOCITY = -12
 PWDTH, PHIGHT = 140, 20 
+GAME_OVER = False
+
+font = pygame.font.Font("PokemonGb-RAeo.ttf", 15)
+score = 0
+highscore = 0
 
 # Colors
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (0, 200, 0)
 RED = (255, 0, 0)
-
+BG_COLOR = (230, 220, 221)
+BG = BG_COLOR
 # Initialize pygame screen
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platform")
 clock = pygame.time.Clock()
 
 icon = pygame.image.load("icon.png")
+icon = pygame.transform.scale(icon, (32, 32))
 pygame.display.set_icon(icon)
 
 # Initialise players
@@ -43,14 +51,16 @@ platforms = [[PLAYER_X - 20, PLAYER_Y + 70, PWDTH, PHIGHT],
 #Function: list -> list
 #Returns the updated list to generate platforms
 def updatePlatfroms(list, playerY, change):
+    global score
+    
     if playerY < 250:
         for i in range(len(list)):
             list[i][1] += change
     for item in range(len(list)):
         if list[item][1] > 600:
             list[item] = [random.randint(10, 750), random.randint(-50, -10), PWDTH, PHIGHT]
+            score += 1
     return list
-
         
 # Main loop
 def main():
@@ -59,7 +69,8 @@ def main():
     global onGround
     global player_rect
     global platforms
-    
+    global score, highscore
+    global GAME_OVER
     
     #Squish/stretch parameters
     stretch_amount = 10
@@ -70,7 +81,12 @@ def main():
     running = True
     while running:
         clock.tick(FPS)
-        screen.fill(WHITE)
+        screen.fill(BG)
+        
+        hscoreText = font.render('Highest: ' + str(highscore), True, BLUE, WHITE)
+        screen.blit(hscoreText, (5, 10))
+        scoreText = font.render('Score: ' + str(score), True, BLUE, WHITE)
+        screen.blit(scoreText, (5, 35))
         
         # Platforms
         blocks = []
@@ -81,10 +97,22 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                
+
         # Movment
         dx = 0                              #Horizontal Movement
         keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and GAME_OVER:
+            score = 0
+            player_rect.x, player_rect.y = PLAYER_X, PLAYER_Y
+            platforms = [[PLAYER_X - 20, PLAYER_Y + 70, PWDTH, PHIGHT],
+             [120, 480, PWDTH, PHIGHT],
+             [200, 370, PWDTH, PHIGHT],
+             [500, 520, PWDTH, PHIGHT],
+             [420, 300, PWDTH, PHIGHT],
+             [210, 220, PWDTH, PHIGHT],
+             [600, 170, PWDTH, PHIGHT],
+             [500, 100, PWDTH, PHIGHT]]
+        
         if keys[pygame.K_UP] and onGround:
             player_vel_y = JUMP_VELOCITY
             onGround = False
@@ -96,9 +124,10 @@ def main():
         is_running = dx != 0
             
         #Gravity
-        player_vel_y += GRAVITY
-        player_rect.y += player_vel_y
-        player_rect.x += dx
+        if not GAME_OVER:
+            player_vel_y += GRAVITY
+            player_rect.y += player_vel_y
+            player_rect.x += dx
         
         # Collision
          
@@ -112,7 +141,7 @@ def main():
             elif player_rect.colliderect(block) and player_rect.top < block.bottom:
                 player_vel_y = 0
         
-        #Horizontal Collision
+        # Horizontal Collision
             if player_rect.colliderect(block):
                 if dx > 0 and player_rect.right > block.left:
                     player_rect.right = block.left 
@@ -122,7 +151,7 @@ def main():
                     onGround = True
         
                   
-        #Animation properties
+        # Animation properties
         stretch_w, stretch_h = PLAYER_WIDTH, PLAYER_HEIGHT
         
         if not onGround:
@@ -153,13 +182,29 @@ def main():
     )
         
               
-        platforms = updatePlatfroms(platforms, player_rect.y, 4)      
+        platforms = updatePlatfroms(platforms, player_rect.y, 4)    
               
         # Draw to screen
         pygame.draw.rect(screen, BLUE, animated_rect)
         
+        # Game Over
+        if player_rect.y > HEIGHT:
+            GAME_OVER = True
+            player_vel_y = 0
+           
+            gmText = font.render('Game Over!', True, BLUE, WHITE)
+            rsText = font.render('Space to Restart.', True, BLUE, WHITE)
+            screen.blit(gmText, (WIDTH / 2 - 70, HEIGHT / 2))
+            screen.blit(rsText, (WIDTH / 2 - 95, HEIGHT / 2 + 30))
+
+        else:
+            GAME_OVER = False
+        
         # Update screen    
         pygame.display.update()
+        
+        if score > highscore:
+            highscore = score
 
     pygame.quit()
     
