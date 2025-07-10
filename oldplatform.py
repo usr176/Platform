@@ -1,3 +1,6 @@
+'''
+Old platfrom file used as a base. Verticle scroll is not implemented here 
+'''
 import pygame, random
 
 pygame.init()
