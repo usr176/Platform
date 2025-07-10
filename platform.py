@@ -115,10 +115,10 @@ def main():
         #Horizontal Collision
             if player_rect.colliderect(block):
                 if dx > 0 and player_rect.right > block.left:
-                    player_rect.right = block.left - 1
+                    player_rect.right = block.left 
                     onGround = True
                 elif dx < 0 and player_rect.left < block.right:
-                    player_rect.left = block.right + 1
+                    player_rect.left = block.right 
                     onGround = True
         
                   
