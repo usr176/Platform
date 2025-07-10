@@ -144,19 +144,19 @@ def main():
             stretch_w += stretch_amount
         
         
-        '''
-        player_rect = pygame.Rect(
+        
+        animated_rect = pygame.Rect(
         player_rect.x + (PLAYER_WIDTH - stretch_w) // 2,
         player_rect.y + (PLAYER_HEIGHT - stretch_h),
         stretch_w,
         stretch_h
     )
-        '''
+        
               
         platforms = updatePlatfroms(platforms, player_rect.y, 4)      
               
         # Draw to screen
-        pygame.draw.rect(screen, BLUE, player_rect)
+        pygame.draw.rect(screen, BLUE, animated_rect)
         
         # Update screen    
         pygame.display.update()
