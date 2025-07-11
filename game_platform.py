@@ -1,5 +1,4 @@
 import pygame, random
-import pygame.freetype
 
 pygame.init()
 
