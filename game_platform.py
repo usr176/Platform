@@ -9,14 +9,18 @@ FPS = 60
 PLAYER_WIDTH, PLAYER_HEIGHT = 50, 60
 PLAYER_X, PLAYER_Y = 400, 480
 GRAVITY = 0.5
-JUMP_VELOCITY = -12
 PWDTH, PHIGHT = 140, 20 
 GAME_OVER = False
 GAME_STATE = "menu"
 MAX_BLEND_SCORE = 1000
 
-font = pygame.font.Font("PokemonGb-RAeo.ttf", 13)
-largeFont = pygame.font.FontType("PokemonGb-RAeo.ttf", 22)
+JUMP_VELOCITY = -12
+JUMP_VELOCITY_MAX = -16
+jump_charge = 0
+chargingJump = False
+
+font = pygame.font.Font("font.ttf", 13)
+largeFont = pygame.font.FontType("font.ttf", 22)
 score = 0
 highscore = 0
 
@@ -146,14 +150,14 @@ def blendBackground(base_color, target_color, ratio):
 # Main loop
 def main():
     
-    global player_vel_y
+    global player_vel_y, player_rect
     global onGround
-    global player_rect
+    global jump_charge
     global platforms, BG
     global score, highscore
     global GAME_OVER, GAME_STATE
     
-    #Squish/stretch parameters
+    # Squish/stretch parameters
     stretch_amount = 10
     squash_timer = 0
     is_running = False   
@@ -194,19 +198,17 @@ def main():
                 
             # Start Game
             
-            
+            # Change BG color everytime player gains 50 score
             if score < 50:
                 blend_ratio = 0.0
             elif score >= 500:
-                blend_ratio = 1.0
+                blend_ratio = 0.93
             else:
                 step_index = (score - 50) // 50 + 1
                 total_steps = (500 - 50) // 50 + 1
                 blend_ratio = step_index / total_steps
-            if blend_ratio >= 1:
-                BG = RED
-            else:
-                BG = blendBackground(BG_COLOR, RED, blend_ratio)
+           
+            BG = blendBackground(BG_COLOR, RED, blend_ratio)
             
             '''
             Platforms
@@ -230,15 +232,39 @@ def main():
                 BG = BG_COLOR
             
             if keys[pygame.K_UP] and onGround:
-                player_vel_y = JUMP_VELOCITY
+                chargeRatio = jump_charge / 60
+                JUMP = JUMP_VELOCITY + (JUMP_VELOCITY_MAX - JUMP_VELOCITY) * chargeRatio
+                player_vel_y = JUMP
+                
                 onGround = False
+                
                 squash_timer = 10
+                jump_charge = 0
             if not GAME_OVER:
                 if keys[pygame.K_RIGHT]: 
                     dx += 5
                 if keys[pygame.K_LEFT]:
                     dx -= 5
+                if keys[pygame.K_DOWN] and onGround:
+                    chargingJump = True
+                    if jump_charge <  60:
+                        jump_charge += 1
+                else:
+                    chargingJump = False
+                    jump_charge = 0
             is_running = dx != 0
+            
+            # Bar to represent jump charge
+            if chargingJump:
+                charge_percent = jump_charge / 60
+                bar_width = 50
+                bar_height = 8
+                bar_x = player_rect.centerx - bar_width // 2
+                bar_y = player_rect.top - 20
+
+                pygame.draw.rect(screen, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
+                pygame.draw.rect(screen, (211, 114, 252), (bar_x, bar_y, int(bar_width * charge_percent), bar_height))
+
             
             '''    
             Gravity
@@ -265,7 +291,9 @@ def main():
             # Horizontal Movement 
             player_rect.x += dx
                     
-            # Animation properties
+            '''
+            Animations
+            '''
             stretch_w, stretch_h = PLAYER_WIDTH, PLAYER_HEIGHT
             
             if not onGround:
