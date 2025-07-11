@@ -20,7 +20,7 @@ jump_charge = 0
 chargingJump = False
 
 font = pygame.font.Font("font.ttf", 13)
-largeFont = pygame.font.FontType("font.ttf", 22)
+largeFont = pygame.font.Font("font.ttf", 22)
 score = 0
 highscore = 0
 
