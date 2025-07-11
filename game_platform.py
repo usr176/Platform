@@ -39,7 +39,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platform")
 clock = pygame.time.Clock()
 
-icon = pygame.image.load("icon.png")
+icon = pygame.image.load("game_icon.ico")
 icon = pygame.transform.scale(icon, (32, 32))
 pygame.display.set_icon(icon)
 
