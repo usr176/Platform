@@ -13,7 +13,8 @@ JUMP_VELOCITY = -12
 PWDTH, PHIGHT = 140, 20 
 GAME_OVER = False
 
-font = pygame.font.Font("PokemonGb-RAeo.ttf", 15)
+font = pygame.font.Font("PokemonGb-RAeo.ttf", 13)
+largeFont = pygame.font.FontType("PokemonGb-RAeo.ttf", 22)
 score = 0
 highscore = 0
 
@@ -61,6 +62,24 @@ def updatePlatfroms(list, playerY, change):
             list[item] = [random.randint(10, 750), random.randint(-50, -10), PWDTH, PHIGHT]
             score += 1
     return list
+    
+# Function: int -> list
+# Create surface for labels
+def createSurface(text, bg_color, border_color=None, padding=10, alpha=255):
+    textRect = text.get_rect()
+    surface = pygame.Surface((textRect.width + 2 * padding, textRect.height + 2 * padding), pygame.SRCALPHA)
+
+    # Fill with background (with transparency)
+    surface.fill((*bg_color, alpha))
+
+    # Optional border
+    if border_color:
+        pygame.draw.rect(surface, border_color, surface.get_rect(), width=2)
+
+    # Blit text onto box
+    surface.blit(text, (padding, padding))
+
+    return surface
         
 # Main loop
 def main():
@@ -82,11 +101,6 @@ def main():
     while running:
         clock.tick(FPS)
         screen.fill(BG)
-        
-        hscoreText = font.render('Highest: ' + str(highscore), True, BLUE, WHITE)
-        screen.blit(hscoreText, (5, 10))
-        scoreText = font.render('Score: ' + str(score), True, BLUE, WHITE)
-        screen.blit(scoreText, (5, 35))
         
         # Platforms
         blocks = []
@@ -187,18 +201,37 @@ def main():
         # Draw to screen
         pygame.draw.rect(screen, BLUE, animated_rect)
         
+        # Draw score to screen
+        hscoreText = font.render('Highest: ' + str(highscore), True, BLUE, WHITE)
+        hscoreBox = createSurface(hscoreText, bg_color=(255, 255, 255), border_color=(0, 0, 0), alpha= 255)
+        screen.blit(hscoreBox, (5, HEIGHT - 50))
+    
+        scoreText = font.render('Score: ' + str(score), True, BLUE, WHITE)
+        scoreBox = createSurface(scoreText, bg_color=(255, 255, 255), border_color=(0, 0, 0), alpha= 255)
+        screen.blit(scoreBox, (5, HEIGHT - 90))
+        
         # Game Over
         if player_rect.y > HEIGHT:
             GAME_OVER = True
             player_vel_y = 0
            
-            gmText = font.render('Game Over!', True, BLUE, WHITE)
-            rsText = font.render('Space to Restart.', True, BLUE, WHITE)
-            screen.blit(gmText, (WIDTH / 2 - 70, HEIGHT / 2))
-            screen.blit(rsText, (WIDTH / 2 - 95, HEIGHT / 2 + 30))
+            gmText = largeFont.render('Game Over!', True, BLUE)
+            rsText = font.render('Space to Restart.', True, BLUE)
+            
+            # Create styled boxes
+            gmBox = createSurface(gmText, bg_color=(255, 255, 255), border_color=(0, 0, 0), alpha= 255)
+            rsBox = createSurface(rsText, bg_color=(255, 255, 255), border_color=(0, 0, 0), alpha= 255)
+            
+            # Position boxes at the center of screen
+            gmRect = gmBox.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            rsRect = rsBox.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 45))
+            
+            screen.blit(gmBox, gmRect)
+            screen.blit(rsBox, rsRect)
 
         else:
             GAME_OVER = False
+        
         
         # Update screen    
         pygame.display.update()
