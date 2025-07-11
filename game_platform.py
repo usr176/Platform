@@ -180,6 +180,9 @@ def main():
             title_text = largeFont.render("Main Menu", True, BLUE)
             screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, 100))
             
+            title_text = font.render("usr176 @ Github", True, BLUE)
+            screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, HEIGHT - 100))
+            
             # Play Button
             if drawButton(
                 screen, "Play", WIDTH//2 - 100, 250, 200, 70,
