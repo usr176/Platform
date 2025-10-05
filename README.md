@@ -1,3 +1,12 @@
+# Platform Jumper 
+
+## Controls
+
+**UP** to Jump <br>
+**Hold down and then press up** to jump higher <br>
+**Left** Move Left <br>
+**Right** Move Right
+
 # Endless Platforms
 #### Video Demo: https://www.youtube.com/watch?v=q2OyEp_dBy8 
 #### Description
